@@ -1,5 +1,5 @@
 import { verifyToken } from "../controllers/helper.js";
-import User from "../models/schema.js";
+import User from "../models/UserSchema.js";
 
 const getMe = async (token) => {
     const id = verifyToken(token);
@@ -15,7 +15,7 @@ export const isAuthenticated = async (req, res, next) => {
             req.me = user;
             next();
         } else {
-            throw new Error("Not authenticated as a librarian")
+            throw new Error("Not authenticated")
         }
     } catch (err) {
         res.status(500).json({ message: err?.message });
