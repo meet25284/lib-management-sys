@@ -78,15 +78,22 @@ export const updateBook = async (req, res) => {
                 message: "Invalid update fields"
             });
         }
-        console.log("book:", req.params.id)
-        console.log("book:", req.body)
+        const bookexist = await Book.findOne({
+            _id:req.params.id,
+            isDeleted:false
+        })
+
+        if (!bookexist) {
+            return res.status(404).json({
+                message: "Book not found"
+            });
+        }
 
 
         const book = await Book.findByIdAndUpdate(
             req.params.id,
-            req.body, {
-            isDeleted: false
-        },
+            req.body,
+
             {
                 new: true,
                 runValidators: true
@@ -94,11 +101,7 @@ export const updateBook = async (req, res) => {
         );
         console.log("book:", book)
 
-        if (!book) {
-            return res.status(404).json({
-                message: "Book not found"
-            });
-        }
+        
 
         res.json(book);
 
