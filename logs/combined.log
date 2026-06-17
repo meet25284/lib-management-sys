@@ -1,0 +1,4 @@
+2026-06-17 09:44:43 [info]: test
+2026-06-17 09:44:43 [error]: error test
+2026-06-17 09:57:43 [info]: Server is running on port 5000
+2026-06-17 09:57:43 [info]: Connected to MongoDB

@@ -1,7 +1,7 @@
 import { verifyToken } from "../controllers/helper.js";
 import User from "../models/UserSchema.js";
 
-const getMe = async (token) => {
+export const getMe = async (token) => {
     const id = verifyToken(token);
     const user = await User.findById(id);
     return user;
@@ -79,7 +79,7 @@ export const isCreator = async (req, res, next) => {
             req.me = user;
             next();
         } else {
-            throw new Error("Not an member")
+            throw new Error("Not an creator")
         }
     } catch (err) {
         res.status(500).json({ message: err?.message });

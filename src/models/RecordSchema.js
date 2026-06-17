@@ -1,42 +1,54 @@
-import { Schema, model } from "mongoose";
+import { Schema, model,mongoose } from "mongoose";
+import User from "./UserSchema.js";
 
 const borrowSchema = new Schema(
-  {
-    userId: {
-      type: ObjectId,
-      required: true,
-    },
+    {
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: User
+        },
 
-    bookId: {
-      type: ObjectId,
-      required: true,
-    },
+        isbn: {
+            type: Number,
+            required: true,
+        },
 
-    borrowDate: {
-      type: Date,
-      default: Date.now,
-    },
+        borrowDate: {
+            type: Date,
+            default: Date.now,
+        },
 
-    dueDate: {
-      type: Date,
-      required: true,
-    },
+        dueDate: {
+            type: Date,
+            default: () => {
+                const date = new Date();
+                date.setDate(date.getDate() + 14);
+                return date;
+            }
+        },
 
-    returnDate: {
-      type: Date,
-      default: null,
-    },
+        returnDate: {
+            type: Date,
+            default: null,
+        },
 
-    status: {
-      type: String,
-      enum: ["borrowed", "returned", "overdue"],
-      default: "borrowed",
+        status: {
+            type: String,
+            enum: ["borrowed", "returned", "overdue"],
+            default: "borrowed",
+        },
+        isDeleted:{
+            type:Boolean,
+            default:false
+        }
     },
-  },
-  {
-    timestamps: true,
-    versionKey: false,
-  }
+    {
+        timestamps: true,
+        versionKey: false,
+    }
 );
 
-export default model("Borrow", borrowSchema);
+const Borrow = model("Borrow", borrowSchema);
+
+export default Borrow;
