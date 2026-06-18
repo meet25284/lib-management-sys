@@ -10,4 +10,3 @@ export const verifyToken = (token) => {
     return verify?.id || null;
 }
 
-export default { createToken, verifyToken };

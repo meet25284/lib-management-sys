@@ -1,8 +1,8 @@
 import User from "../models/UserSchema.js";
-import { emailvalidation, passwordvalidation } from "../validations/validate.js";
 import bcrypt from "bcryptjs"
 import { createToken } from "./helper.js";
 import { LoginValidater, registerValidater } from "../validations/validater.js";
+import {sendOTP, verifyOTP, welcomeEmail} from "../services/nodemailer.js"
 
 export const RegisterUser = async (req, res) => {
     try {
@@ -24,6 +24,7 @@ export const RegisterUser = async (req, res) => {
                 role: req.body.role,
             });
             await User.create(user);
+            await welcomeEmail(user.email)
             return res.status(200).json({ message: "User created successfully" });
         
         }
@@ -51,7 +52,8 @@ export const login = async (req, res) => {
                 const isPasswordValid = await bcrypt.compare(req.body.password, user.password);
                 if (isPasswordValid) {
                     const token = createToken(user._id);
-                    res.status(200).json({ message: "Login successful", token: token });
+                    await welcomeEmail(user.email)
+                    return res.status(200).json({ message: "Login successful", token: token });
                 }
             } else {
                 return res.status(400).json({ message: "User not found" });
@@ -62,6 +64,45 @@ export const login = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 }
+
+export const otplogin = async (req, res)=>{
+    try {
+        if(req.body.email){
+        const user = await User.findOne({email:req.body.email})
+        if(user){
+            await sendOTP(user.email);
+            return res.status(200).json({message:"hit on post http://localhost:5000/api/auth/verifyOTP"})
+        }
+        else{
+            res.status(400).json({message:"invalid field enter"})
+        }
+    }
+        
+    } catch (error) {
+        res.json({message:error.message})
+        
+    }
+} 
+
+export const verifyotp = async (req, res) => {
+
+    const { email, otp } = req.body;
+
+    const verified = verifyOTP(
+        email,
+        otp
+    );
+
+    if (!verified) {
+        return res.status(400).json({
+            message: "Invalid OTP"
+        });
+    }else if(verified){
+        const user = await User.findOne({email:req.body.email})
+        const token = createToken(user._id);
+        return res.status(200).json({ message: "Login successful", token: token });
+    }
+};
 
 export const profile = async (req, res) => {
     try {
