@@ -7,7 +7,7 @@ const bookschema = new mongoose.Schema({
     isbn: { type: String, immutable: true, required: true ,unique : true},
     description: { type: String, required: true },
     totalCopies: { type: Number, required: true },
-    availableCopies: { type: Number, required: true },
+    availableCopies: { type: Number },
     createdAt: {
         type: Date,
         default: Date.now,

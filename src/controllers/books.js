@@ -2,7 +2,7 @@ import Book from "../models/BookSchema.js";
 
 export const createBook = async (req, res) => {
     try {
-        if (req.body.title && req.body.author && req.body.category && req.body.isbn && req.body.description && req.body.totalCopies && req.body.availableCopies) {
+        if (req.body.title && req.body.author && req.body.category && req.body.isbn && req.body.description && req.body.totalCopies) {
             const exist = await Book.findOne({ isbn: req.body.isbn })
 
             if (exist) {
@@ -15,24 +15,24 @@ export const createBook = async (req, res) => {
                 isbn: req.body.isbn,
                 description: req.body.description,
                 totalCopies: req.body.totalCopies,
-                availableCopies: req.body.availableCopies
             })
             await Book.create(books);
             return res.status(200).json({ message: "book added successfully" });
 
         }
     } catch (error) {
-        res.json(message.error)
+        res.json({message:error.message})
 
     }
 }
 
 export const getallBooks = async (req, res) => {
     try {
-        const page = req.query.page || 1;
-        const limit = req.query.limit || 1;
-        const books = await Book.find({ isDeleted: false }).skip((page - 1) * limit)
-            .limit(limit);
+        // const page = req.query.page || 1;
+        // const limit = req.query.limit || 10;
+        const books = await Book.find({ isDeleted: false })
+        // .skip((page - 1) * limit)
+        //     .limit(limit);
         res.json(books).status(200);
     }
     catch (err) {
@@ -40,7 +40,7 @@ export const getallBooks = async (req, res) => {
     }
 }
 
-export const getBook =async (req, res) => {
+export const getBook = async (req, res) => {
     try {
         const books = await Book.findOne({ isbn: req.params.isbn, isDeleted: false });
         if (books) {
@@ -57,6 +57,8 @@ export const getBook =async (req, res) => {
 }
 
 export const updateBook = async (req, res) => {
+      console.log(req.params.id)
+      console.log(req.body)
     try {
 
         const allowedUpdates = [
@@ -79,8 +81,8 @@ export const updateBook = async (req, res) => {
             });
         }
         const bookexist = await Book.findOne({
-            _id:req.params.id,
-            isDeleted:false
+            isbn: req.params.id,
+            isDeleted: false
         })
 
         if (!bookexist) {
@@ -90,8 +92,8 @@ export const updateBook = async (req, res) => {
         }
 
 
-        const book = await Book.findByIdAndUpdate(
-            req.params.id,
+        const book = await Book.findOneAndUpdate(
+            {isbn:req.params.id},
             req.body,
 
             {
@@ -99,11 +101,10 @@ export const updateBook = async (req, res) => {
                 runValidators: true
             }
         );
-        console.log("book:", book)
 
-        
 
-        res.json(book);
+
+        res.json({message:"book updated successfull"});
 
     } catch (err) {
         res.status(500).json({
@@ -112,10 +113,10 @@ export const updateBook = async (req, res) => {
     }
 };
 
-export const deleteBook=  async (req, res) => {
+export const deleteBook = async (req, res) => {
     try {
-        const book = await Book.findByIdAndUpdate(
-            req.params.id,
+        const book = await Book.findOneAndUpdate(
+            {isbn:req.params.id},
             {
                 isDeleted: true
             },
@@ -133,6 +134,7 @@ export const deleteBook=  async (req, res) => {
         res.status(200).json({
             success: true,
             data: book,
+            message:"book deleted successfull"
         });
 
     } catch (err) {
@@ -151,13 +153,13 @@ export const search = async (req, res) => {
         const title = req.query.title;
         const book = await Book.find({
             title: {
-                $regex:title,
-                $options:"i" 
+                $regex: title,
+                $options: "i"
             },
             isDeleted: false
         })
-        .skip((page - 1) * limit)
-        .limit(limit);
+            .skip((page - 1) * limit)
+            .limit(limit);
         if (book.length === 0) {
             res.status(404).json({ message: "book not found" });
 

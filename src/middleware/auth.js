@@ -2,10 +2,16 @@ import { verifyToken } from "../controllers/helper.js";
 import User from "../models/UserSchema.js";
 
 export const getMe = async (token) => {
-    const id = verifyToken(token);
+    // const id = verifyToken(token);
+    if (!token) return null;
+    const cleanToken = token.startsWith("Bearer ") ? token.slice(7) : token;
+    const id = verifyToken(cleanToken);
+    if (!id) return null;
     const user = await User.findById(id);
     return user;
-}
+};
+
+
 
 export const isAuthenticated = async (req, res, next) => {
     try {

@@ -10,7 +10,7 @@ const borrowSchema = new Schema(
         },
 
         isbn: {
-            type: Number,
+            type: String,
             required: true,
         },
 

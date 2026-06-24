@@ -14,17 +14,20 @@ import swaggerSpec from "./src/config/swagger.js";
 
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true,
+}));
 app.use(express.json());
 app.use(morgan("combined"));
 
 mongoose.connect(process.env.MONGODB_URI)
-.then(() => {
-  logger.info("Connected to MongoDB");
-  startDailyReminders();
-  updateStatus();
-})
-.catch((err) => logger.error("MongoDB connection failed", { err }));
+  .then(() => {
+    logger.info("Connected to MongoDB");
+    startDailyReminders();
+    updateStatus();
+  })
+  .catch((err) => logger.error("MongoDB connection failed", { err }));
 
 app.use("/api/", router);
 app.use("/api/", bookrouter);

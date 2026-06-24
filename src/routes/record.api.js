@@ -1,6 +1,6 @@
 import express from "express";
-import { isMember } from "../middleware/auth.js";
-import { borrowBook, mybook, returnBook } from "../controllers/record.js";
+import { isAdmin, isMember } from "../middleware/auth.js";
+import { adminBorrowBook, borrowBook, mybook, returnBook } from "../controllers/record.js";
 
 const Recordrouter = express.Router();
 
@@ -12,6 +12,14 @@ Recordrouter.post("/borrow", isMember, async (req, res) => {
         res.json({message:"get error"});
     }
 })
+
+Recordrouter.post("/admin/borrow", isAdmin, async (req, res) => {
+    try {
+        return await adminBorrowBook(req, res);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
 
 Recordrouter.patch("/return",isMember,async(req, res)=>{
  try {

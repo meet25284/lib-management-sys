@@ -1,6 +1,7 @@
 import { getMe } from "../middleware/auth.js";
 import Book from "../models/BookSchema.js";
 import Borrow from "../models/RecordSchema.js";
+import User from "../models/UserSchema.js";
 
 export const borrowBook = async (req, res) => { 
     try {
@@ -48,6 +49,44 @@ export const borrowBook = async (req, res) => {
         return res.status(500).json({
             message: err.message
         });
+    }
+};
+
+export const adminBorrowBook = async (req, res) => {
+    try {
+        const { userId, isbn } = req.body || {};
+
+        if (!userId || !isbn) {
+            return res.status(400).json({ message: "userId and isbn are required" });
+        }
+
+        const user = await User.findOne({ _id: userId, isDeleted: false });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const book = await Book.findOne({ isbn, isDeleted: false });
+        if (!book) {
+            return res.status(404).json({ message: "Book not found" });
+        }
+
+        const max = await Borrow.find({ userId: user._id, returnDate: null });
+        if (Object.keys(max).length > 5) {
+            return res.status(400).json({ message: "User can borrow max 5 books" });
+        }
+
+        const borrow = await Borrow.create({
+            userId: user._id,
+            isbn: book.isbn,
+            status: "borrowed"
+        });
+
+        return res.status(200).json({
+            message: "Borrow successful",
+            borrow
+        });
+    } catch (err) {
+        return res.status(500).json({ message: err.message });
     }
 };
 
